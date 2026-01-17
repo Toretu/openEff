@@ -1,6 +1,27 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(OpenGuitar VERSION 1.0.0)
+# Get version from Git
+execute_process(
+    COMMAND git rev-list --count HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_COUNT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+
+# Fallback if not in a git repo
+if(NOT GIT_COMMIT_COUNT)
+    set(GIT_COMMIT_COUNT 0)
+endif()
+
+# Version: Major.Minor.BuildNumber
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 0)
+set(VERSION_BUILD ${GIT_COMMIT_COUNT})
+
+project(OpenGuitar VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD})
+
+message(STATUS "Building OpenGuitar version ${PROJECT_VERSION}")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
