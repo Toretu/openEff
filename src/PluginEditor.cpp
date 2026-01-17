@@ -35,13 +35,13 @@ OpenGuitarAudioProcessorEditor::OpenGuitarAudioProcessorEditor(OpenGuitarAudioPr
     bypassButton.setButtonText("BYPASS");
     addAndMakeVisible(bypassButton);
 
-    // Attach Fuzz parameters
+    // Attach parameters
     gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-        audioProcessor.parameters, "fuzz_gain", gainSlider);
+        audioProcessor.parameters, "gain", gainSlider);
     toneAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-        audioProcessor.parameters, "fuzz_tone", toneSlider);
+        audioProcessor.parameters, "tone", toneSlider);
     levelAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-        audioProcessor.parameters, "fuzz_level", levelSlider);
+        audioProcessor.parameters, "level", levelSlider);
     bypassAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
         audioProcessor.parameters, "bypass", bypassButton);
 

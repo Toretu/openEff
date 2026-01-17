@@ -2,13 +2,13 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
-#include "effects/Fuzz.h"
+#include "effects/Compressor.h"
 
-class OpenGuitarAudioProcessor : public juce::AudioProcessor
+class CompressorAudioProcessor : public juce::AudioProcessor
 {
 public:
-    OpenGuitarAudioProcessor();
-    ~OpenGuitarAudioProcessor() override;
+    CompressorAudioProcessor();
+    ~CompressorAudioProcessor() override;
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -33,14 +33,11 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
-    // Parameters
     juce::AudioProcessorValueTreeState parameters;
-    
-    // Fuzz effect
-    Fuzz fuzzEffect;
+    Compressor compressorEffect;
 
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OpenGuitarAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CompressorAudioProcessor)
 };

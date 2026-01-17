@@ -6,6 +6,9 @@ cmake-build-*/
 *.sdf
 *.opensdf
 
+# Output directory (keeping VST3 artifacts)
+# openEff/
+
 # IDE files
 .vscode/
 .idea/

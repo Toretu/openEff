@@ -1,18 +1,16 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
-#include <juce_dsp/juce_dsp.h>
-#include "effects/Fuzz.h"
+#include "effects/Reverb.h"
 
-class OpenGuitarAudioProcessor : public juce::AudioProcessor
+class ReverbProcessor : public juce::AudioProcessor
 {
 public:
-    OpenGuitarAudioProcessor();
-    ~OpenGuitarAudioProcessor() override;
+    ReverbProcessor();
+    ~ReverbProcessor() override;
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
-    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     juce::AudioProcessorEditor* createEditor() override;
@@ -33,14 +31,17 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
-    // Parameters
-    juce::AudioProcessorValueTreeState parameters;
-    
-    // Fuzz effect
-    Fuzz fuzzEffect;
+    juce::AudioProcessorValueTreeState& getValueTreeState() { return valueTreeState; }
 
 private:
-    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-    
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OpenGuitarAudioProcessor)
+    juce::AudioProcessorValueTreeState valueTreeState;
+    Reverb reverb;
+
+    std::atomic<float>* roomSizeParam = nullptr;
+    std::atomic<float>* dampingParam = nullptr;
+    std::atomic<float>* wetLevelParam = nullptr;
+    std::atomic<float>* widthParam = nullptr;
+    std::atomic<float>* bypassParam = nullptr;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReverbProcessor)
 };
