@@ -1,0 +1,37 @@
+# Build artifacts
+build/
+cmake-build-*/
+*.user
+*.suo
+*.sdf
+*.opensdf
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# JUCE specific
+JuceLibraryCode/
+Builds/
+
+# Compiled files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Plugin files (keep source, ignore builds)
+*.vst3
+*.component
+*.aax
