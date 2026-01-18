@@ -1,0 +1,163 @@
+name: Build VST3 Plugins
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0  # Get full git history for version numbering
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2-dev \
+            libcurl4-openssl-dev \
+            libfreetype6-dev \
+            libx11-dev \
+            libxcomposite-dev \
+            libxcursor-dev \
+            libxext-dev \
+            libxinerama-dev \
+            libxrandr-dev \
+            libxrender-dev \
+            libwebkit2gtk-4.0-dev \
+            libglu1-mesa-dev \
+            mesa-common-dev
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.22.x'
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel 4
+
+      - name: Create artifacts directory
+        run: cmake -E make_directory artifacts
+
+      - name: Package VST3 plugins (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          # Find and copy all VST3 plugins
+          find build -name "*.vst3" -type d -exec cp -r {} artifacts/ \;
+          
+          # Create zip files for each plugin
+          cd artifacts
+          for plugin in *.vst3; do
+            if [ -d "$plugin" ]; then
+              plugin_name="${plugin%.vst3}"
+              zip -r "${plugin_name}_${{ runner.os }}.zip" "$plugin"
+            fi
+          done
+
+      - name: Package VST3 plugins (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Find and copy all VST3 plugins
+          Get-ChildItem -Path build -Filter *.vst3 -Recurse -Directory | ForEach-Object {
+            Copy-Item -Path $_.FullName -Destination artifacts\ -Recurse -Force
+          }
+          
+          # Create zip files for each plugin
+          cd artifacts
+          Get-ChildItem -Filter *.vst3 -Directory | ForEach-Object {
+            $pluginName = $_.BaseName
+            Compress-Archive -Path $_.FullName -DestinationPath "${pluginName}_Windows.zip"
+          }
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenGuitar-VST3-${{ runner.os }}
+          path: artifacts/*.zip
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R release-artifacts
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release-files
+          find release-artifacts -name "*.zip" -exec cp {} release-files/ \;
+          ls -lh release-files/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-files/*.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ## OpenGuitar VST3 Plugins
+            
+            Download the appropriate version for your operating system:
+            
+            ### Installation Instructions
+            
+            **Windows:**
+            1. Extract the ZIP file
+            2. Copy the `.vst3` folder to: `C:\Program Files\Common Files\VST3\`
+            3. Rescan plugins in your DAW
+            
+            **macOS:**
+            1. Extract the ZIP file
+            2. Copy the `.vst3` bundle to: `~/Library/Audio/Plug-Ins/VST3/` or `/Library/Audio/Plug-Ins/VST3/`
+            3. Rescan plugins in your DAW
+            
+            **Linux:**
+            1. Extract the ZIP file
+            2. Copy the `.vst3` folder to: `~/.vst3/` or `/usr/lib/vst3/`
+            3. Rescan plugins in your DAW
+            
+            ### Included Plugins
+            - OpenGuitar Fuzz
+            - OpenGuitar Compressor
+            - OpenGuitar Reverb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
