@@ -62,6 +62,7 @@ Once you push a tag starting with `v` (e.g., `v1.0.0`, `v2.1.3`), GitHub Actions
 
 ```bash
 # Install dependencies (Ubuntu/Debian)
+# Note: Use libwebkit2gtk-4.1-dev on Ubuntu 24.04+, or libwebkit2gtk-4.0-dev on older versions
 sudo apt-get install -y \
     libasound2-dev \
     libcurl4-openssl-dev \
@@ -73,7 +74,7 @@ sudo apt-get install -y \
     libxinerama-dev \
     libxrandr-dev \
     libxrender-dev \
-    libwebkit2gtk-4.0-dev \
+    libwebkit2gtk-4.1-dev \
     libglu1-mesa-dev \
     mesa-common-dev
 
