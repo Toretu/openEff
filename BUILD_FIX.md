@@ -1,8 +1,8 @@
 # Build Error Fix - Summary
 
-## Problem Identified ✓
+## Problems Identified & Fixed ✓
 
-The GitHub Actions build was failing because:
+### Problem 1: Empty JUCE Directory ✓ FIXED
 
 **The `JUCE` directory was empty!**
 
@@ -11,31 +11,28 @@ When I checked `/code/openEff/JUCE`, it existed but had no files inside. This me
 - ❌ No JUCE framework to build VST3 plugins
 - ❌ Build failed immediately on all platforms
 
-## Root Cause
-
-JUCE was committed to the repository as an empty directory instead of being properly configured as a **git submodule**.
-
-## Solution Applied ✓
-
-### 1. Removed Empty JUCE Directory
+**Solution:** Configured JUCE as a proper git submodule
 ```bash
 git rm -rf JUCE
-```
-
-### 2. Added JUCE as Git Submodule
-```bash
 git submodule add https://github.com/juce-framework/JUCE.git JUCE
 ```
 
-This creates:
-- `.gitmodules` file (tells git about the submodule)
-- Proper JUCE reference in your repository
-- JUCE code will be automatically downloaded when GitHub Actions checks out your code
+### Problem 2: Wrong WebKit Package Name for Ubuntu 24.04 ✓ FIXED
 
-### 3. Committed and Pushed
-```bash
-git commit -m "Fix: Add JUCE as git submodule for GitHub Actions builds"
-git push origin main
+**The Linux build was failing with:**
+```
+E: Unable to locate package libwebkit2gtk-4.0-dev
+```
+
+Ubuntu 24.04 (the GitHub Actions runner) uses `libwebkit2gtk-4.1-dev` instead of the older `libwebkit2gtk-4.0-dev`.
+
+**Solution:** Updated `.github/workflows/build.yml`
+```yaml
+# Changed from:
+libwebkit2gtk-4.0-dev
+
+# To:
+libwebkit2gtk-4.1-dev
 ```
 
 ## Why This Fixes GitHub Actions
