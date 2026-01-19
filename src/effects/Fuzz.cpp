@@ -118,3 +118,64 @@ float Fuzz::asymmetricClip(float sample)
     
     return sample;
 }
+
+std::unique_ptr<juce::XmlElement> Fuzz::getStateInformation() const
+{
+    auto xml = std::make_unique<juce::XmlElement>("Fuzz");
+    xml->setAttribute("gain", gain);
+    xml->setAttribute("tone", tone);
+    xml->setAttribute("level", level);
+    xml->setAttribute("bypassed", bypassed);
+    return xml;
+}
+
+void Fuzz::setStateInformation(const juce::XmlElement& xml)
+{
+    if (xml.hasTagName("Fuzz"))
+    {
+        gain = static_cast<float>(xml.getDoubleAttribute("gain", 5.0));
+        tone = static_cast<float>(xml.getDoubleAttribute("tone", 0.5));
+        level = static_cast<float>(xml.getDoubleAttribute("level", 0.7));
+        bypassed = xml.getBoolAttribute("bypassed", false);
+    }
+}
+
+void Fuzz::addParametersToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout,
+                                  const juce::String& prefix)
+{
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        prefix + "gain",
+        "Gain",
+        juce::NormalisableRange<float>(0.0f, 10.0f, 0.1f),
+        5.0f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        prefix + "tone",
+        "Tone",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        prefix + "level",
+        "Level",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.7f));
+}
+
+void Fuzz::linkParameters(juce::AudioProcessorValueTreeState& apvts,
+                          const juce::String& prefix)
+{
+    // Link parameters from APVTS to internal values
+    if (auto* gainParam = apvts.getRawParameterValue(prefix + "gain"))
+    {
+        gain = *gainParam;
+    }
+    if (auto* toneParam = apvts.getRawParameterValue(prefix + "tone"))
+    {
+        tone = *toneParam;
+    }
+    if (auto* levelParam = apvts.getRawParameterValue(prefix + "level"))
+    {
+        level = *levelParam;
+    }
+}

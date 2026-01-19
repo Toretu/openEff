@@ -112,3 +112,91 @@ void Compressor::updateCoefficients()
     attackCoeff = std::exp(-1.0f / (attack * 0.001f * static_cast<float>(sampleRate)));
     releaseCoeff = std::exp(-1.0f / (release * 0.001f * static_cast<float>(sampleRate)));
 }
+
+std::unique_ptr<juce::XmlElement> Compressor::getStateInformation() const
+{
+    auto xml = std::make_unique<juce::XmlElement>("Compressor");
+    xml->setAttribute("threshold", threshold);
+    xml->setAttribute("ratio", ratio);
+    xml->setAttribute("attack", attack);
+    xml->setAttribute("release", release);
+    xml->setAttribute("makeupGain", makeupGain);
+    xml->setAttribute("bypassed", bypassed);
+    return xml;
+}
+
+void Compressor::setStateInformation(const juce::XmlElement& xml)
+{
+    if (xml.hasTagName("Compressor"))
+    {
+        threshold = static_cast<float>(xml.getDoubleAttribute("threshold", -20.0));
+        ratio = static_cast<float>(xml.getDoubleAttribute("ratio", 4.0));
+        attack = static_cast<float>(xml.getDoubleAttribute("attack", 10.0));
+        release = static_cast<float>(xml.getDoubleAttribute("release", 100.0));
+        makeupGain = static_cast<float>(xml.getDoubleAttribute("makeupGain", 0.0));
+        bypassed = xml.getBoolAttribute("bypassed", false);
+        updateCoefficients();
+    }
+}
+
+void Compressor::addParametersToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout,
+                                        const juce::String& prefix)
+{
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        prefix + "threshold",
+        "Threshold",
+        juce::NormalisableRange<float>(-60.0f, 0.0f, 0.1f),
+        -20.0f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        prefix + "ratio",
+        "Ratio",
+        juce::NormalisableRange<float>(1.0f, 20.0f, 0.1f),
+        4.0f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        prefix + "attack",
+        "Attack",
+        juce::NormalisableRange<float>(0.1f, 100.0f, 0.1f),
+        10.0f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        prefix + "release",
+        "Release",
+        juce::NormalisableRange<float>(10.0f, 1000.0f, 1.0f),
+        100.0f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        prefix + "makeupGain",
+        "Makeup Gain",
+        juce::NormalisableRange<float>(0.0f, 24.0f, 0.1f),
+        0.0f));
+}
+
+void Compressor::linkParameters(juce::AudioProcessorValueTreeState& apvts,
+                                const juce::String& prefix)
+{
+    // Link parameters from APVTS to internal values
+    if (auto* thresholdParam = apvts.getRawParameterValue(prefix + "threshold"))
+    {
+        threshold = *thresholdParam;
+    }
+    if (auto* ratioParam = apvts.getRawParameterValue(prefix + "ratio"))
+    {
+        ratio = *ratioParam;
+    }
+    if (auto* attackParam = apvts.getRawParameterValue(prefix + "attack"))
+    {
+        attack = *attackParam;
+        updateCoefficients();
+    }
+    if (auto* releaseParam = apvts.getRawParameterValue(prefix + "release"))
+    {
+        release = *releaseParam;
+        updateCoefficients();
+    }
+    if (auto* makeupParam = apvts.getRawParameterValue(prefix + "makeupGain"))
+    {
+        makeupGain = *makeupParam;
+    }
+}

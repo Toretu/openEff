@@ -3,16 +3,29 @@
 #include <juce_dsp/juce_dsp.h>
 #include <juce_core/juce_core.h>
 #include "../dsp/Filter.h"
+#include "EffectBase.h"
 
-class Fuzz
+class Fuzz : public EffectBase
 {
 public:
     Fuzz();
-    ~Fuzz();
+    ~Fuzz() override;
 
-    void prepare(double sampleRate, int samplesPerBlock);
-    void reset();
-    void processBlock(juce::AudioBuffer<float>& buffer);
+    // EffectBase interface implementation
+    void prepare(double sampleRate, int samplesPerBlock) override;
+    void reset() override;
+    void processBlock(juce::AudioBuffer<float>& buffer) override;
+    
+    juce::String getName() const override { return "Fuzz"; }
+    juce::String getEffectType() const override { return "fuzz"; }
+    
+    std::unique_ptr<juce::XmlElement> getStateInformation() const override;
+    void setStateInformation(const juce::XmlElement& xml) override;
+    
+    void addParametersToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout,
+                               const juce::String& prefix) override;
+    void linkParameters(juce::AudioProcessorValueTreeState& apvts,
+                       const juce::String& prefix) override;
 
     // Parameter setters
     void setGain(float newGain);

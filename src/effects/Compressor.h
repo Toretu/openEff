@@ -2,16 +2,29 @@
 
 #include <juce_dsp/juce_dsp.h>
 #include <juce_core/juce_core.h>
+#include "EffectBase.h"
 
-class Compressor
+class Compressor : public EffectBase
 {
 public:
     Compressor();
-    ~Compressor();
+    ~Compressor() override;
 
-    void prepare(double sampleRate, int samplesPerBlock);
-    void reset();
-    void processBlock(juce::AudioBuffer<float>& buffer);
+    // EffectBase interface implementation
+    void prepare(double sampleRate, int samplesPerBlock) override;
+    void reset() override;
+    void processBlock(juce::AudioBuffer<float>& buffer) override;
+    
+    juce::String getName() const override { return "Compressor"; }
+    juce::String getEffectType() const override { return "compressor"; }
+    
+    std::unique_ptr<juce::XmlElement> getStateInformation() const override;
+    void setStateInformation(const juce::XmlElement& xml) override;
+    
+    void addParametersToLayout(juce::AudioProcessorValueTreeState::ParameterLayout& layout,
+                               const juce::String& prefix) override;
+    void linkParameters(juce::AudioProcessorValueTreeState& apvts,
+                       const juce::String& prefix) override;
 
     // Parameter setters
     void setThreshold(float thresholdDb);

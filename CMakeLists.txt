@@ -174,3 +174,68 @@ add_custom_command(TARGET OpenGuitar_Reverb_VST3 POST_BUILD
     COMMAND robocopy "$<TARGET_FILE_DIR:OpenGuitar_Reverb_VST3>/../.." "${CMAKE_SOURCE_DIR}/openEff/vst/OpenGuitar Reverb.vst3" /E /IS /IT /R:0 /W:0 /NP /XJD /XJF || (exit 0)
     COMMENT "Copying Reverb VST3 to openEff/vst/"
 )
+
+# Pedal Board Plugin
+juce_add_plugin(OpenGuitar_PedalBoard
+    COMPANY_NAME "OpenGuitar"
+    PLUGIN_MANUFACTURER_CODE Ogtr
+    PLUGIN_CODE Ogpb
+    FORMATS VST3
+    PRODUCT_NAME "OpenGuitar Pedal Board"
+    NEEDS_MIDI_INPUT FALSE
+    NEEDS_MIDI_OUTPUT FALSE
+    IS_MIDI_EFFECT FALSE
+    EDITOR_WANTS_KEYBOARD_FOCUS FALSE
+    COPY_PLUGIN_AFTER_BUILD FALSE
+    VST3_CATEGORIES "Fx" "Tools")
+
+target_sources(OpenGuitar_PedalBoard
+    PRIVATE
+        src/pedalboard/PedalBoardProcessor.cpp
+        src/pedalboard/PedalBoardProcessor.h
+        src/pedalboard/PedalBoardEditor.cpp
+        src/pedalboard/PedalBoardEditor.h
+        src/pedalboard/EffectChain.cpp
+        src/pedalboard/EffectChain.h
+        src/pedalboard/EffectFactory.cpp
+        src/pedalboard/EffectFactory.h
+        src/pedalboard/ui/PedalComponent.cpp
+        src/pedalboard/ui/PedalComponent.h
+        src/pedalboard/ui/PedalLookAndFeel.cpp
+        src/pedalboard/ui/PedalLookAndFeel.h
+        src/effects/EffectBase.cpp
+        src/effects/EffectBase.h
+        src/effects/Fuzz.cpp
+        src/effects/Fuzz.h
+        src/effects/Compressor.cpp
+        src/effects/Compressor.h
+        src/effects/Reverb.cpp
+        src/effects/Reverb.h
+        src/dsp/Filter.cpp
+        src/dsp/Filter.h)
+
+target_compile_definitions(OpenGuitar_PedalBoard
+    PUBLIC
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0
+        JUCE_VST3_CAN_REPLACE_VST2=0
+        JUCE_DISPLAY_SPLASH_SCREEN=0
+        JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=0)
+
+target_link_libraries(OpenGuitar_PedalBoard
+    PRIVATE
+        juce::juce_audio_utils
+        juce::juce_audio_processors
+        juce::juce_dsp
+        juce::juce_gui_basics
+    PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags
+        juce::juce_recommended_warning_flags)
+
+# Copy PedalBoard VST3 to custom directory
+add_custom_command(TARGET OpenGuitar_PedalBoard_VST3 POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/openEff/vst"
+    COMMAND robocopy "$<TARGET_FILE_DIR:OpenGuitar_PedalBoard_VST3>/../.." "${CMAKE_SOURCE_DIR}/openEff/vst/OpenGuitar PedalBoard.vst3" /E /IS /IT /R:0 /W:0 /NP /XJD /XJF || (exit 0)
+    COMMENT "Copying PedalBoard VST3 to openEff/vst/"
+)
