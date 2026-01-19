@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 # Get version from Git
 execute_process(
-    COMMAND git rev-list --count HEADgit 
+    COMMAND git rev-list --count HEAD
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_COMMIT_COUNT
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -72,10 +72,10 @@ target_link_libraries(OpenGuitar_Fuzz
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
-# Copy Fuzz VST3 to custom directory
+# Copy Fuzz VST3 to custom directory (cross-platform)
 add_custom_command(TARGET OpenGuitar_Fuzz_VST3 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/openEff/vst"
-    COMMAND robocopy "$<TARGET_FILE_DIR:OpenGuitar_Fuzz_VST3>/../.." "${CMAKE_SOURCE_DIR}/openEff/vst/OpenGuitar Fuzz.vst3" /E /IS /IT /R:0 /W:0 /NP /XJD /XJF || (exit 0)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_FILE_DIR:OpenGuitar_Fuzz_VST3>/../.." "${CMAKE_SOURCE_DIR}/openEff/vst/OpenGuitar Fuzz.vst3"
     COMMENT "Copying Fuzz VST3 to openEff/vst/"
 )
 
@@ -120,10 +120,10 @@ target_link_libraries(OpenGuitar_Compressor
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
-# Copy Compressor VST3 to custom directory
+# Copy Compressor VST3 to custom directory (cross-platform)
 add_custom_command(TARGET OpenGuitar_Compressor_VST3 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/openEff/vst"
-    COMMAND robocopy "$<TARGET_FILE_DIR:OpenGuitar_Compressor_VST3>/../.." "${CMAKE_SOURCE_DIR}/openEff/vst/OpenGuitar Compressor.vst3" /E /IS /IT /R:0 /W:0 /NP /XJD /XJF || (exit 0)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_FILE_DIR:OpenGuitar_Compressor_VST3>/../.." "${CMAKE_SOURCE_DIR}/openEff/vst/OpenGuitar Compressor.vst3"
     COMMENT "Copying Compressor VST3 to openEff/vst/"
 )
 
@@ -168,10 +168,10 @@ target_link_libraries(OpenGuitar_Reverb
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
-# Copy Reverb VST3 to custom directory
+# Copy Reverb VST3 to custom directory (cross-platform)
 add_custom_command(TARGET OpenGuitar_Reverb_VST3 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/openEff/vst"
-    COMMAND robocopy "$<TARGET_FILE_DIR:OpenGuitar_Reverb_VST3>/../.." "${CMAKE_SOURCE_DIR}/openEff/vst/OpenGuitar Reverb.vst3" /E /IS /IT /R:0 /W:0 /NP /XJD /XJF || (exit 0)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_FILE_DIR:OpenGuitar_Reverb_VST3>/../.." "${CMAKE_SOURCE_DIR}/openEff/vst/OpenGuitar Reverb.vst3"
     COMMENT "Copying Reverb VST3 to openEff/vst/"
 )
 
