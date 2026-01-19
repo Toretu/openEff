@@ -156,6 +156,7 @@ jobs:
             3. Rescan plugins in your DAW
             
             ### Included Plugins
+            - OpenGuitar Pedal Board (multi-effect chain)
             - OpenGuitar Fuzz
             - OpenGuitar Compressor
             - OpenGuitar Reverb
