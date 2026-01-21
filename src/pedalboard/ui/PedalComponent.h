@@ -67,6 +67,7 @@ private:
     // Tuner-specific display
     std::unique_ptr<juce::Label> tunerNoteLabel;
     std::unique_ptr<juce::Label> tunerCentsLabel;
+    std::unique_ptr<juce::Label> tunerArrowLabel;
     
     //==============================================================================
     void createControlsForEffect();

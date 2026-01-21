@@ -7,6 +7,10 @@ PedalBoardEditor::PedalBoardEditor(PedalBoardProcessor& p)
     // Set larger editor size for pedal board
     setSize(900, 500);
     
+    // Make the window resizable with constraints
+    setResizable(true, true);
+    setResizeLimits(600, 400, 1600, 1000);
+    
     // Apply custom look and feel
     setLookAndFeel(&pedalLookAndFeel);
     
@@ -20,9 +24,11 @@ PedalBoardEditor::PedalBoardEditor(PedalBoardProcessor& p)
     // Setup effect selector combo box
     effectSelector.addItem("Compressor", 1);
     effectSelector.addItem("Fuzz", 2);
-    effectSelector.addItem("Reverb", 3);
-    effectSelector.addItem("Chorus", 4);
-    effectSelector.addItem("Tuner", 5);
+    effectSelector.addItem("Orange", 3);
+    effectSelector.addItem("Big Muff", 4);
+    effectSelector.addItem("Reverb", 5);
+    effectSelector.addItem("Chorus", 6);
+    effectSelector.addItem("Tuner", 7);
     effectSelector.setSelectedId(1);
     effectSelector.addListener(this);
     addAndMakeVisible(effectSelector);
@@ -161,9 +167,11 @@ void PedalBoardEditor::buttonClicked(juce::Button* button)
         {
             case 1: effectType = "compressor"; break;
             case 2: effectType = "fuzz"; break;
-            case 3: effectType = "reverb"; break;
-            case 4: effectType = "chorus"; break;
-            case 5: effectType = "tuner"; break;
+            case 3: effectType = "orange"; break;
+            case 4: effectType = "bigmuff"; break;
+            case 5: effectType = "reverb"; break;
+            case 6: effectType = "chorus"; break;
+            case 7: effectType = "tuner"; break;
             default: return;
         }
         

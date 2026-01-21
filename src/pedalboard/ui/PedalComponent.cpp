@@ -86,12 +86,15 @@ void PedalComponent::resized()
     bounds.removeFromTop(5);
     
     // Special handling for tuner
-    if (effect->getEffectType() == "tuner" && tunerNoteLabel && tunerCentsLabel)
+    if (effect->getEffectType() == "tuner" && tunerNoteLabel && tunerArrowLabel && tunerCentsLabel)
     {
         auto displayArea = bounds.removeFromTop(150);
-        tunerNoteLabel->setBounds(displayArea.removeFromTop(80));
-        displayArea.removeFromTop(5);
-        tunerCentsLabel->setBounds(displayArea.removeFromTop(40));
+        displayArea.removeFromTop(5); // Top spacing
+        tunerNoteLabel->setBounds(displayArea.removeFromTop(60));
+        displayArea.removeFromTop(5); // Spacing
+        tunerArrowLabel->setBounds(displayArea.removeFromTop(45));
+        displayArea.removeFromTop(5); // Spacing
+        tunerCentsLabel->setBounds(displayArea.removeFromTop(30));
     }
     else
     {
@@ -185,6 +188,118 @@ void PedalComponent::createControlsForEffect()
         addAndMakeVisible(toneLabel);
         
         // Level knob
+        auto* levelSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
+        levelSlider->setRange(0.0, 1.0, 0.01);
+        levelSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
+        levelSlider->setNumDecimalPlacesToDisplay(2);
+        levelSlider->setEnabled(true);
+        levelSlider->setInterceptsMouseClicks(true, true);
+        addAndMakeVisible(levelSlider);
+        sliderAttachments.add(new juce::AudioProcessorValueTreeState::SliderAttachment(apvts, paramPrefix + "level", *levelSlider));
+        
+        auto* levelLabel = sliderLabels.add(new juce::Label());
+        levelLabel->setText("Level", juce::dontSendNotification);
+        levelLabel->setJustificationType(juce::Justification::centred);
+        levelLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        levelLabel->setFont(juce::FontOptions(12.0f, juce::Font::bold));
+        levelLabel->setInterceptsMouseClicks(false, false);
+        addAndMakeVisible(levelLabel);
+    }
+    else if (effect->getEffectType() == "bigmuff")
+    {
+        // Sustain knob
+        auto* sustainSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
+        sustainSlider->setRange(0.0, 1.0, 0.01);
+        sustainSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
+        sustainSlider->setNumDecimalPlacesToDisplay(2);
+        sustainSlider->setEnabled(true);
+        sustainSlider->setInterceptsMouseClicks(true, true);
+        addAndMakeVisible(sustainSlider);
+        sliderAttachments.add(new juce::AudioProcessorValueTreeState::SliderAttachment(apvts, paramPrefix + "sustain", *sustainSlider));
+        
+        auto* sustainLabel = sliderLabels.add(new juce::Label());
+        sustainLabel->setText("Sustain", juce::dontSendNotification);
+        sustainLabel->setJustificationType(juce::Justification::centred);
+        sustainLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        sustainLabel->setFont(juce::FontOptions(12.0f, juce::Font::bold));
+        sustainLabel->setInterceptsMouseClicks(false, false);
+        addAndMakeVisible(sustainLabel);
+        
+        // Tone knob
+        auto* toneSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
+        toneSlider->setRange(0.0, 1.0, 0.01);
+        toneSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
+        toneSlider->setNumDecimalPlacesToDisplay(2);
+        toneSlider->setEnabled(true);
+        toneSlider->setInterceptsMouseClicks(true, true);
+        addAndMakeVisible(toneSlider);
+        sliderAttachments.add(new juce::AudioProcessorValueTreeState::SliderAttachment(apvts, paramPrefix + "tone", *toneSlider));
+        
+        auto* toneLabel = sliderLabels.add(new juce::Label());
+        toneLabel->setText("Tone", juce::dontSendNotification);
+        toneLabel->setJustificationType(juce::Justification::centred);
+        toneLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        toneLabel->setFont(juce::FontOptions(12.0f, juce::Font::bold));
+        toneLabel->setInterceptsMouseClicks(false, false);
+        addAndMakeVisible(toneLabel);
+        
+        // Volume knob
+        auto* volumeSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
+        volumeSlider->setRange(0.0, 1.0, 0.01);
+        volumeSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
+        volumeSlider->setNumDecimalPlacesToDisplay(2);
+        volumeSlider->setEnabled(true);
+        volumeSlider->setInterceptsMouseClicks(true, true);
+        addAndMakeVisible(volumeSlider);
+        sliderAttachments.add(new juce::AudioProcessorValueTreeState::SliderAttachment(apvts, paramPrefix + "volume", *volumeSlider));
+        
+        auto* volumeLabel = sliderLabels.add(new juce::Label());
+        volumeLabel->setText("Volume", juce::dontSendNotification);
+        volumeLabel->setJustificationType(juce::Justification::centred);
+        volumeLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        volumeLabel->setFont(juce::FontOptions(12.0f, juce::Font::bold));
+        volumeLabel->setInterceptsMouseClicks(false, false);
+        addAndMakeVisible(volumeLabel);
+    }
+    else if (effect->getEffectType() == "orange")
+    {
+        // Gain
+        auto* gainSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
+        gainSlider->setRange(0.0, 1.0, 0.01);
+        gainSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
+        gainSlider->setNumDecimalPlacesToDisplay(2);
+        gainSlider->setEnabled(true);
+        gainSlider->setInterceptsMouseClicks(true, true);
+        addAndMakeVisible(gainSlider);
+        sliderAttachments.add(new juce::AudioProcessorValueTreeState::SliderAttachment(apvts, paramPrefix + "gain", *gainSlider));
+        
+        auto* gainLabel = sliderLabels.add(new juce::Label());
+        gainLabel->setText("Gain", juce::dontSendNotification);
+        gainLabel->setJustificationType(juce::Justification::centred);
+        gainLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        gainLabel->setFont(juce::FontOptions(12.0f, juce::Font::bold));
+        gainLabel->setInterceptsMouseClicks(false, false);
+        addAndMakeVisible(gainLabel);
+        
+        // Tone
+        auto* toneSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
+        toneSlider->setRange(0.0, 1.0, 0.01);
+        toneSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
+        toneSlider->setNumDecimalPlacesToDisplay(2);
+        toneSlider->setEnabled(true);
+        toneSlider->setInterceptsMouseClicks(true, true);
+        addAndMakeVisible(toneSlider);
+        sliderAttachments.add(new juce::AudioProcessorValueTreeState::SliderAttachment(apvts, paramPrefix + "tone", *toneSlider));
+        
+        auto* toneLabel = sliderLabels.add(new juce::Label());
+        toneLabel->setText("Tone", juce::dontSendNotification);
+        toneLabel->setJustificationType(juce::Justification::centred);
+        toneLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        toneLabel->setFont(juce::FontOptions(12.0f, juce::Font::bold));
+        toneLabel->setInterceptsMouseClicks(false, false);
+        addAndMakeVisible(toneLabel);
+        
+        // Level
         auto* levelSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
         levelSlider->setRange(0.0, 1.0, 0.01);
         levelSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
@@ -398,15 +513,22 @@ void PedalComponent::createControlsForEffect()
         tunerNoteLabel->setColour(juce::Label::textColourId, juce::Colours::white);
         addAndMakeVisible(tunerNoteLabel.get());
         
+        tunerArrowLabel = std::make_unique<juce::Label>();
+        tunerArrowLabel->setText("", juce::dontSendNotification);
+        tunerArrowLabel->setFont(juce::FontOptions(36.0f, juce::Font::bold));
+        tunerArrowLabel->setJustificationType(juce::Justification::centred);
+        tunerArrowLabel->setColour(juce::Label::textColourId, juce::Colours::yellow);
+        addAndMakeVisible(tunerArrowLabel.get());
+        
         tunerCentsLabel = std::make_unique<juce::Label>();
         tunerCentsLabel->setText("0¢", juce::dontSendNotification);
-        tunerCentsLabel->setFont(juce::FontOptions(24.0f, juce::Font::bold));
+        tunerCentsLabel->setFont(juce::FontOptions(20.0f, juce::Font::bold));
         tunerCentsLabel->setJustificationType(juce::Justification::centred);
         tunerCentsLabel->setColour(juce::Label::textColourId, juce::Colours::lightgrey);
         addAndMakeVisible(tunerCentsLabel.get());
         
-        // Start timer to update tuner display
-        startTimer(50); // Update 20 times per second
+        // Start timer to update tuner display - slower for stability
+        startTimer(100); // Update 10 times per second
     }
     
     // Note: Bypass attachment would need a parameter to be added to the APVTS for each effect
@@ -418,6 +540,10 @@ juce::Colour PedalComponent::getPedalColour() const
     // Different colors for different effect types
     if (effect->getEffectType() == "fuzz")
         return juce::Colour(0xff8b4513); // Brown/orange for fuzz
+    else if (effect->getEffectType() == "bigmuff")
+        return juce::Colour(0xffc71585); // Medium violet red for Big Muff (classic EHX color)
+    else if (effect->getEffectType() == "orange")
+        return juce::Colour(0xffff8c00); // Bright orange for Orange amp
     else if (effect->getEffectType() == "compressor")
         return juce::Colour(0xff4169e1); // Royal blue for compressor
     else if (effect->getEffectType() == "reverb")
@@ -433,14 +559,33 @@ juce::Colour PedalComponent::getPedalColour() const
 void PedalComponent::timerCallback()
 {
     // Update tuner display
-    if (effect->getEffectType() == "tuner" && tunerNoteLabel && tunerCentsLabel)
+    if (effect->getEffectType() == "tuner" && tunerNoteLabel && tunerArrowLabel && tunerCentsLabel)
     {
         auto* tuner = dynamic_cast<Tuner*>(effect);
-        if (tuner)
+        if (tuner && tuner->isNoteDetected())
         {
             tunerNoteLabel->setText(tuner->getNoteName(), juce::dontSendNotification);
             
             float cents = tuner->getCentsDeviation();
+            int direction = tuner->getTuningDirection();
+            
+            // Show arrow for tuning direction
+            if (direction > 0)
+            {
+                tunerArrowLabel->setText("↑ TUNE UP", juce::dontSendNotification);
+                tunerArrowLabel->setColour(juce::Label::textColourId, juce::Colours::orange);
+            }
+            else if (direction < 0)
+            {
+                tunerArrowLabel->setText("↓ TUNE DOWN", juce::dontSendNotification);
+                tunerArrowLabel->setColour(juce::Label::textColourId, juce::Colours::orange);
+            }
+            else
+            {
+                tunerArrowLabel->setText("★ IN TUNE ★", juce::dontSendNotification);
+                tunerArrowLabel->setColour(juce::Label::textColourId, juce::Colours::green);
+            }
+            
             juce::String centsText = juce::String(cents >= 0.0f ? "+" : "") + 
                                     juce::String(cents, 1) + "¢";
             tunerCentsLabel->setText(centsText, juce::dontSendNotification);
@@ -452,6 +597,14 @@ void PedalComponent::timerCallback()
                 tunerCentsLabel->setColour(juce::Label::textColourId, juce::Colours::yellow);
             else
                 tunerCentsLabel->setColour(juce::Label::textColourId, juce::Colours::red);
+        }
+        else
+        {
+            // No signal detected
+            tunerNoteLabel->setText("--", juce::dontSendNotification);
+            tunerArrowLabel->setText("♪ Play a note", juce::dontSendNotification);
+            tunerArrowLabel->setColour(juce::Label::textColourId, juce::Colours::grey);
+            tunerCentsLabel->setText("", juce::dontSendNotification);
         }
     }
 }

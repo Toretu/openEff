@@ -1,27 +1,31 @@
 cmake_minimum_required(VERSION 3.15)
 
-# Get version from Git
-execute_process(
-    COMMAND git rev-list --count HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_COMMIT_COUNT
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_QUIET
-)
+# Read current version from version.txt
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/version.txt" VERSION_STRING)
+string(STRIP "${VERSION_STRING}" VERSION_STRING)
 
-# Fallback if not in a git repo
-if(NOT GIT_COMMIT_COUNT)
-    set(GIT_COMMIT_COUNT 0)
+# Parse version (format: MAJOR.MINOR.PATCH)
+string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" VERSION_MATCH "${VERSION_STRING}")
+if(VERSION_MATCH)
+    set(VERSION_MAJOR ${CMAKE_MATCH_1})
+    set(VERSION_MINOR ${CMAKE_MATCH_2})
+    set(VERSION_PATCH ${CMAKE_MATCH_3})
+else()
+    # Fallback if version.txt is invalid
+    set(VERSION_MAJOR 1)
+    set(VERSION_MINOR 0)
+    set(VERSION_PATCH 0)
 endif()
 
-# Version: Major.Minor (where Minor = git commit count)
-set(VERSION_MAJOR 1)
-set(VERSION_MINOR ${GIT_COMMIT_COUNT})
-set(VERSION_BUILD 0)
-
-project(OpenGuitar VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD})
+project(OpenGuitar VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 message(STATUS "Building OpenGuitar version ${PROJECT_VERSION}")
+
+# Increment version for next build
+math(EXPR NEXT_PATCH "${VERSION_PATCH} + 1")
+set(NEXT_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${NEXT_PATCH}")
+file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/version.txt" "${NEXT_VERSION}")
+message(STATUS "Next build will be version ${NEXT_VERSION}")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -213,6 +217,10 @@ target_sources(OpenGuitar_PedalBoard
         src/effects/Reverb.h
         src/effects/Chorus.cpp
         src/effects/Chorus.h
+        src/effects/Orange.cpp
+        src/effects/Orange.h
+        src/effects/BigMuff.cpp
+        src/effects/BigMuff.h
         src/effects/Tuner.cpp
         src/effects/Tuner.h
         src/dsp/Filter.cpp

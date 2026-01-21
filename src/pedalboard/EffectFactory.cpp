@@ -3,6 +3,8 @@
 #include "../effects/Compressor.h"
 #include "../effects/Reverb.h"
 #include "../effects/Chorus.h"
+#include "../effects/Orange.h"
+#include "../effects/BigMuff.h"
 #include "../effects/Tuner.h"
 
 std::unique_ptr<EffectBase> EffectFactory::createEffect(const juce::String& effectType)
@@ -19,6 +21,12 @@ std::unique_ptr<EffectBase> EffectFactory::createEffect(const juce::String& effe
     if (effectType == "chorus")
         return std::make_unique<Chorus>();
     
+    if (effectType == "orange")
+        return std::make_unique<Orange>();
+    
+    if (effectType == "bigmuff")
+        return std::make_unique<BigMuff>();
+    
     if (effectType == "tuner")
         return std::make_unique<Tuner>();
     
@@ -32,6 +40,8 @@ juce::StringArray EffectFactory::getAvailableEffectTypes()
     return {
         "compressor",
         "fuzz",
+        "orange",
+        "bigmuff",
         "reverb",
         "chorus",
         "tuner"
@@ -53,6 +63,12 @@ juce::String EffectFactory::getEffectDisplayName(const juce::String& effectType)
     if (effectType == "chorus")
         return "Chorus";
     
+    if (effectType == "orange")
+        return "Orange";
+    
+    if (effectType == "bigmuff")
+        return "Big Muff";
+    
     if (effectType == "tuner")
         return "Tuner";
     
@@ -62,6 +78,12 @@ juce::String EffectFactory::getEffectDisplayName(const juce::String& effectType)
 juce::String EffectFactory::getEffectCategory(const juce::String& effectType)
 {
     if (effectType == "fuzz")
+        return "Distortion";
+    
+    if (effectType == "orange")
+        return "Distortion";
+    
+    if (effectType == "bigmuff")
         return "Distortion";
     
     if (effectType == "compressor")

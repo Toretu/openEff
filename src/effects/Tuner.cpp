@@ -3,6 +3,7 @@
 
 Tuner::Tuner()
 {
+    frequencyHistory.resize(maxHistorySize, 0.0f);
 }
 
 Tuner::~Tuner()
@@ -28,6 +29,8 @@ void Tuner::reset()
     noteName = "--";
     centsDeviation = 0.0f;
     noteDetected = false;
+    std::fill(frequencyHistory.begin(), frequencyHistory.end(), 0.0f);
+    historyWriteIndex = 0;
 }
 
 void Tuner::processBlock(juce::AudioBuffer<float>& buffer)
@@ -80,9 +83,29 @@ void Tuner::processBlock(juce::AudioBuffer<float>& buffer)
         
         if (frequency > 0.0f)
         {
-            detectedFrequency = frequency;
-            updateNoteInfo(frequency);
-            noteDetected = true;
+            // Add to history for smoothing
+            frequencyHistory[historyWriteIndex] = frequency;
+            historyWriteIndex = (historyWriteIndex + 1) % maxHistorySize;
+            
+            // Calculate average of valid frequencies in history
+            float sum = 0.0f;
+            int count = 0;
+            for (float f : frequencyHistory)
+            {
+                if (f > 0.0f)
+                {
+                    sum += f;
+                    count++;
+                }
+            }
+            
+            if (count > 0)
+            {
+                float smoothedFrequency = sum / count;
+                detectedFrequency = smoothedFrequency;
+                updateNoteInfo(smoothedFrequency);
+                noteDetected = true;
+            }
         }
         else
         {

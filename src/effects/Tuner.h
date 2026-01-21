@@ -34,6 +34,7 @@ public:
     juce::String getNoteName() const { return noteName; }
     float getCentsDeviation() const { return centsDeviation; }
     bool isNoteDetected() const { return noteDetected; }
+    int getTuningDirection() const { return centsDeviation > 5.0f ? 1 : (centsDeviation < -5.0f ? -1 : 0); }
 
 private:
     // Pitch detection
@@ -53,6 +54,11 @@ private:
     static constexpr int analysisBufferSize = 8192;
     static constexpr int analysisHopSize = 512;
     int samplesSinceLastAnalysis = 0;
+    
+    // Smoothing for stability (0.5 second averaging)
+    std::vector<float> frequencyHistory;
+    static constexpr int maxHistorySize = 25; // ~0.5 seconds at 50Hz update rate
+    int historyWriteIndex = 0;
     
     // Note names
     static constexpr const char* noteNames[12] = {
