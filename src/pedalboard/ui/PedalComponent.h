@@ -9,7 +9,8 @@
  * Visual component representing a single guitar effect pedal.
  * Displays parameters as rotary knobs and includes bypass control.
  */
-class PedalComponent : public juce::Component
+class PedalComponent : public juce::Component,
+                       public juce::Timer
 {
 public:
     /**
@@ -63,9 +64,14 @@ private:
     juce::OwnedArray<juce::AudioProcessorValueTreeState::SliderAttachment> sliderAttachments;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> bypassAttachment;
     
+    // Tuner-specific display
+    std::unique_ptr<juce::Label> tunerNoteLabel;
+    std::unique_ptr<juce::Label> tunerCentsLabel;
+    
     //==============================================================================
     void createControlsForEffect();
     juce::Colour getPedalColour() const;
+    void timerCallback();
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PedalComponent)
 };

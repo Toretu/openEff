@@ -1,4 +1,5 @@
 #include "PedalComponent.h"
+#include "../../effects/Tuner.h"
 
 PedalComponent::PedalComponent(EffectBase* eff,
                                juce::AudioProcessorValueTreeState& valueTreeState,
@@ -84,43 +85,54 @@ void PedalComponent::resized()
     
     bounds.removeFromTop(5);
     
-    // Arrange knobs in a grid
-    int numKnobs = sliders.size();
-    if (numKnobs > 0)
+    // Special handling for tuner
+    if (effect->getEffectType() == "tuner" && tunerNoteLabel && tunerCentsLabel)
     {
-        int knobsPerRow = (numKnobs <= 2) ? numKnobs : 2;
-        int knobSize = 60;
-        int labelHeight = 25;
-        int rowSpacing = 10;
-        
-        int numRows = (numKnobs + knobsPerRow - 1) / knobsPerRow;
-        int rowHeight = knobSize + labelHeight;
-        
-        // Calculate total width needed for knobs
-        int totalKnobWidth = knobsPerRow * knobSize + (knobsPerRow - 1) * 10;
-        int startX = (bounds.getWidth() - totalKnobWidth) / 2;
-        
-        for (int i = 0; i < numKnobs; ++i)
+        auto displayArea = bounds.removeFromTop(150);
+        tunerNoteLabel->setBounds(displayArea.removeFromTop(80));
+        displayArea.removeFromTop(5);
+        tunerCentsLabel->setBounds(displayArea.removeFromTop(40));
+    }
+    else
+    {
+        // Arrange knobs in a grid
+        int numKnobs = sliders.size();
+        if (numKnobs > 0)
         {
-            int row = i / knobsPerRow;
-            int col = i % knobsPerRow;
+            int knobsPerRow = (numKnobs <= 2) ? numKnobs : 2;
+            int knobSize = 60;
+            int labelHeight = 25;
+            int rowSpacing = 10;
             
-            int x = startX + col * (knobSize + 10);
-            int y = row * (rowHeight + rowSpacing);
+            int numRows = (numKnobs + knobsPerRow - 1) / knobsPerRow;
+            int rowHeight = knobSize + labelHeight;
             
-            if (auto* slider = sliders[i])
+            // Calculate total width needed for knobs
+            int totalKnobWidth = knobsPerRow * knobSize + (knobsPerRow - 1) * 10;
+            int startX = (bounds.getWidth() - totalKnobWidth) / 2;
+            
+            for (int i = 0; i < numKnobs; ++i)
             {
-                slider->setBounds(x, y, knobSize, knobSize);
+                int row = i / knobsPerRow;
+                int col = i % knobsPerRow;
+                
+                int x = startX + col * (knobSize + 10);
+                int y = row * (rowHeight + rowSpacing);
+                
+                if (auto* slider = sliders[i])
+                {
+                    slider->setBounds(x, y, knobSize, knobSize);
+                }
+                
+                if (auto* label = sliderLabels[i])
+                {
+                    label->setBounds(x, y + knobSize + 2, knobSize, labelHeight);
+                }
             }
             
-            if (auto* label = sliderLabels[i])
-            {
-                label->setBounds(x, y + knobSize + 2, knobSize, labelHeight);
-            }
+            // Remove the space used by knobs
+            bounds.removeFromTop(numRows * (rowHeight + rowSpacing));
         }
-        
-        // Remove the space used by knobs
-        bounds.removeFromTop(numRows * (rowHeight + rowSpacing));
     }
     
     // Bypass button at bottom
@@ -320,6 +332,82 @@ void PedalComponent::createControlsForEffect()
         wetLabel->setInterceptsMouseClicks(false, false);
         addAndMakeVisible(wetLabel);
     }
+    else if (effect->getEffectType() == "chorus")
+    {
+        // Rate knob
+        auto* rateSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
+        rateSlider->setRange(0.1, 5.0, 0.01);
+        rateSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
+        rateSlider->setNumDecimalPlacesToDisplay(2);
+        rateSlider->setEnabled(true);
+        rateSlider->setInterceptsMouseClicks(true, true);
+        addAndMakeVisible(rateSlider);
+        sliderAttachments.add(new juce::AudioProcessorValueTreeState::SliderAttachment(apvts, paramPrefix + "rate", *rateSlider));
+        
+        auto* rateLabel = sliderLabels.add(new juce::Label());
+        rateLabel->setText("Rate", juce::dontSendNotification);
+        rateLabel->setJustificationType(juce::Justification::centred);
+        rateLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        rateLabel->setFont(juce::FontOptions(12.0f, juce::Font::bold));
+        rateLabel->setInterceptsMouseClicks(false, false);
+        addAndMakeVisible(rateLabel);
+        
+        // Depth knob
+        auto* depthSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
+        depthSlider->setRange(0.0, 1.0, 0.01);
+        depthSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
+        depthSlider->setNumDecimalPlacesToDisplay(2);
+        depthSlider->setEnabled(true);
+        depthSlider->setInterceptsMouseClicks(true, true);
+        addAndMakeVisible(depthSlider);
+        sliderAttachments.add(new juce::AudioProcessorValueTreeState::SliderAttachment(apvts, paramPrefix + "depth", *depthSlider));
+        
+        auto* depthLabel = sliderLabels.add(new juce::Label());
+        depthLabel->setText("Depth", juce::dontSendNotification);
+        depthLabel->setJustificationType(juce::Justification::centred);
+        depthLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        depthLabel->setFont(juce::FontOptions(12.0f, juce::Font::bold));
+        depthLabel->setInterceptsMouseClicks(false, false);
+        addAndMakeVisible(depthLabel);
+        
+        // Mix knob
+        auto* mixSlider = sliders.add(new juce::Slider(juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow));
+        mixSlider->setRange(0.0, 1.0, 0.01);
+        mixSlider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
+        mixSlider->setNumDecimalPlacesToDisplay(2);
+        mixSlider->setEnabled(true);
+        mixSlider->setInterceptsMouseClicks(true, true);
+        addAndMakeVisible(mixSlider);
+        sliderAttachments.add(new juce::AudioProcessorValueTreeState::SliderAttachment(apvts, paramPrefix + "mix", *mixSlider));
+        
+        auto* mixLabel = sliderLabels.add(new juce::Label());
+        mixLabel->setText("Mix", juce::dontSendNotification);
+        mixLabel->setJustificationType(juce::Justification::centred);
+        mixLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        mixLabel->setFont(juce::FontOptions(12.0f, juce::Font::bold));
+        mixLabel->setInterceptsMouseClicks(false, false);
+        addAndMakeVisible(mixLabel);
+    }
+    else if (effect->getEffectType() == "tuner")
+    {
+        // Tuner has no knobs, just display labels
+        tunerNoteLabel = std::make_unique<juce::Label>();
+        tunerNoteLabel->setText("--", juce::dontSendNotification);
+        tunerNoteLabel->setFont(juce::FontOptions(48.0f, juce::Font::bold));
+        tunerNoteLabel->setJustificationType(juce::Justification::centred);
+        tunerNoteLabel->setColour(juce::Label::textColourId, juce::Colours::white);
+        addAndMakeVisible(tunerNoteLabel.get());
+        
+        tunerCentsLabel = std::make_unique<juce::Label>();
+        tunerCentsLabel->setText("0¢", juce::dontSendNotification);
+        tunerCentsLabel->setFont(juce::FontOptions(24.0f, juce::Font::bold));
+        tunerCentsLabel->setJustificationType(juce::Justification::centred);
+        tunerCentsLabel->setColour(juce::Label::textColourId, juce::Colours::lightgrey);
+        addAndMakeVisible(tunerCentsLabel.get());
+        
+        // Start timer to update tuner display
+        startTimer(50); // Update 20 times per second
+    }
     
     // Note: Bypass attachment would need a parameter to be added to the APVTS for each effect
     // For now, we'll handle bypass through the effect's setBypassed method
@@ -334,6 +422,36 @@ juce::Colour PedalComponent::getPedalColour() const
         return juce::Colour(0xff4169e1); // Royal blue for compressor
     else if (effect->getEffectType() == "reverb")
         return juce::Colour(0xff2e8b57); // Sea green for reverb
+    else if (effect->getEffectType() == "chorus")
+        return juce::Colour(0xff9370db); // Medium purple for chorus
+    else if (effect->getEffectType() == "tuner")
+        return juce::Colour(0xff00ced1); // Dark turquoise for tuner
     
     return juce::Colour(0xff3a3a3a); // Default grey
+}
+
+void PedalComponent::timerCallback()
+{
+    // Update tuner display
+    if (effect->getEffectType() == "tuner" && tunerNoteLabel && tunerCentsLabel)
+    {
+        auto* tuner = dynamic_cast<Tuner*>(effect);
+        if (tuner)
+        {
+            tunerNoteLabel->setText(tuner->getNoteName(), juce::dontSendNotification);
+            
+            float cents = tuner->getCentsDeviation();
+            juce::String centsText = juce::String(cents >= 0.0f ? "+" : "") + 
+                                    juce::String(cents, 1) + "¢";
+            tunerCentsLabel->setText(centsText, juce::dontSendNotification);
+            
+            // Color code based on how in-tune
+            if (std::abs(cents) < 5.0f)
+                tunerCentsLabel->setColour(juce::Label::textColourId, juce::Colours::green);
+            else if (std::abs(cents) < 15.0f)
+                tunerCentsLabel->setColour(juce::Label::textColourId, juce::Colours::yellow);
+            else
+                tunerCentsLabel->setColour(juce::Label::textColourId, juce::Colours::red);
+        }
+    }
 }

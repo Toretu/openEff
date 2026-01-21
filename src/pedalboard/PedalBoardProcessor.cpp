@@ -4,6 +4,7 @@
 #include "../effects/Fuzz.h"
 #include "../effects/Compressor.h"
 #include "../effects/Reverb.h"
+#include "../effects/Chorus.h"
 
 PedalBoardProcessor::PedalBoardProcessor()
     : AudioProcessor(BusesProperties()
@@ -310,6 +311,15 @@ void PedalBoardProcessor::updateEffectParametersFromAPVTS()
                     dynamic_cast<Reverb*>(effect)->setWetLevel(*wetLevelParam);
                 if (auto* widthParam = apvts->getRawParameterValue(prefix + "width"))
                     dynamic_cast<Reverb*>(effect)->setWidth(*widthParam);
+            }
+            else if (effect->getEffectType() == "chorus")
+            {
+                if (auto* rateParam = apvts->getRawParameterValue(prefix + "rate"))
+                    dynamic_cast<Chorus*>(effect)->setRate(*rateParam);
+                if (auto* depthParam = apvts->getRawParameterValue(prefix + "depth"))
+                    dynamic_cast<Chorus*>(effect)->setDepth(*depthParam);
+                if (auto* mixParam = apvts->getRawParameterValue(prefix + "mix"))
+                    dynamic_cast<Chorus*>(effect)->setMix(*mixParam);
             }
             
             effectIndex++;

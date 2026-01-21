@@ -21,6 +21,8 @@ PedalBoardEditor::PedalBoardEditor(PedalBoardProcessor& p)
     effectSelector.addItem("Compressor", 1);
     effectSelector.addItem("Fuzz", 2);
     effectSelector.addItem("Reverb", 3);
+    effectSelector.addItem("Chorus", 4);
+    effectSelector.addItem("Tuner", 5);
     effectSelector.setSelectedId(1);
     effectSelector.addListener(this);
     addAndMakeVisible(effectSelector);
@@ -160,6 +162,8 @@ void PedalBoardEditor::buttonClicked(juce::Button* button)
             case 1: effectType = "compressor"; break;
             case 2: effectType = "fuzz"; break;
             case 3: effectType = "reverb"; break;
+            case 4: effectType = "chorus"; break;
+            case 5: effectType = "tuner"; break;
             default: return;
         }
         

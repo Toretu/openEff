@@ -14,10 +14,10 @@ if(NOT GIT_COMMIT_COUNT)
     set(GIT_COMMIT_COUNT 0)
 endif()
 
-# Version: Major.Minor.BuildNumber
+# Version: Major.Minor (where Minor = git commit count)
 set(VERSION_MAJOR 1)
-set(VERSION_MINOR 0)
-set(VERSION_BUILD ${GIT_COMMIT_COUNT})
+set(VERSION_MINOR ${GIT_COMMIT_COUNT})
+set(VERSION_BUILD 0)
 
 project(OpenGuitar VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_BUILD})
 
@@ -211,6 +211,10 @@ target_sources(OpenGuitar_PedalBoard
         src/effects/Compressor.h
         src/effects/Reverb.cpp
         src/effects/Reverb.h
+        src/effects/Chorus.cpp
+        src/effects/Chorus.h
+        src/effects/Tuner.cpp
+        src/effects/Tuner.h
         src/dsp/Filter.cpp
         src/dsp/Filter.h)
 
